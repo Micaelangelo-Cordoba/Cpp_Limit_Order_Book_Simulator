@@ -8,7 +8,9 @@ This simulator processes millions of simulated orders, organizing bids and asks 
 
 # Performance Metrics 🚀
 **Throughput:** ~3.3 million orders per second.
+
 **Average latency:** 300 nanoseconds per order
+
 **Hardware Profile:** Tested on a 2019 Intel-based MacBook Air.
 
 
@@ -18,11 +20,11 @@ Achieved microsecond-level latency by bypassing out-of-the-box standard data str
 
 The LOB state is managed by a fusion of a few data structures that allow for O(1) critical-path operations.
 
-1) Price Priority: (std::map) Orders are grouped into PriceLevel buckets. The underlying red-black tree ensures that the highest-priority bids and asks are immediately accessible.
+1) **Price Priority: (std::map)** Orders are grouped into PriceLevel buckets. The underlying red-black tree ensures that the highest-priority bids and asks are immediately accessible.
    
-2) Time Priority: (doubly Linked-List) PriceLevel structs manage a doubly linked-list of Order structs. This allows for a FIFO execution of Orders and allows for an O(1) insertion of Orders.
+2) **Time Priority: (doubly Linked-List)** PriceLevel structs manage a doubly linked-list of Order structs. This allows for a FIFO execution of Orders and allows for an O(1) insertion of Orders.
 
-3) Instant Cancellation: (std::unordered_map) A hash map links an Order's ID with a pointer to its physical memory address. This allows the engine to directly jump to an order, unlink it from the linked-list and free its memory back into the memory pool in O(1) time without traversing through the list.
+3) **Instant Cancellation: (std::unordered_map)** A hash map links an Order's ID with a pointer to its physical memory address. This allows the engine to directly jump to an order, unlink it from the linked-list and free its memory back into the memory pool in O(1) time without traversing through the list.
 
 
 
