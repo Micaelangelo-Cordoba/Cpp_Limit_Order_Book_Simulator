@@ -37,6 +37,17 @@ At startup, millions of Order Structs are allocated side-by-side in RAM. The ord
 
 During live trading, Order structs are popped from the free list memory stack in O(1) constant time, minimizing the need for requesting the Operating System for heap memory.
 
+# How To Run (Linux/MacOS)
+
+1) **Clone The Repository**
+    git clone https://github.com/Micaelangelo-Cordoba/Cpp_Limit_Order_Book_Simulator.git
+
+2) **Move to Main Directory**
+    cd Cpp_Limit_Order_Book_Simulator
+
+3) **run executable**
+    ./matching_engine
+
 
 
 
