@@ -41,11 +41,9 @@ critical-path operations:
 
 # Custom Free-List Memory Pool
 
-Dynamic memory allocation ('new'/'delete') introduces latency spikes due to kernel system calls and heap fragmentation
+Dynamic memory allocation ('new'/'delete') can introduce variable latency and allocator overhead. The custom free-list pool provides constant-time allocation and deallocation of preallocated Order nodes.
 
 This engine implements a custom contiguous memory arena (free list) using a preallocated std::vector.
-
-At startup, millions of Order Structs are allocated side-by-side in RAM. The order structs are padded and aligned (alignas(32)) to fit perfectly within 64-byte cache lines. 
 
 During live trading, Order structs are popped from the free list memory stack in O(1) constant time, minimizing the need for requesting the Operating System for heap memory.
 
