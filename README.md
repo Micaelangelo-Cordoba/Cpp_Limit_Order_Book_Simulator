@@ -6,7 +6,7 @@ Engineered a low-latency limit order book simulator (LOB) written in modern C++.
 
 This simulator processes millions of simulated orders, organizing bids and asks in price-time priority. 
 
-Through the utilization of custom memory management and efficient data structures, the engine achieves deterministic performance and processes over **3.3 million orders per second** on consumer hardware. 
+Through the utilization of custom memory management and efficient data structures, the engine achieves deterministic performance and processes over **4.3 million orders per second** on consumer hardware. 
 
 # Performance Metrics 🚀
 **Throughput (Single-Threaded):** ~4.3 million orders per second.
@@ -27,13 +27,14 @@ Through the utilization of custom memory management and efficient data structure
 
 Achieved microsecond-level latency by bypassing out-of-the-box standard data structures such as std::priority_queue.
 
-The LOB state is managed by a fusion of a few data structures that allow for O(1) critical-path operations.
+The LOB state is managed by the combination of a few data structures that allow for algorithmically efficient
+critical-path operations:
 
-1) **Price Priority: (std::map)** Orders are grouped into PriceLevel buckets. The underlying red-black tree ensures that the highest-priority bids and asks are immediately accessible.
+1) **Price Priority: (std::map)** Orders are grouped into Price-Level buckets. They are maintained in sorted order using balanced search trees, allowing for insertion and removal of Price-Level structs takes O(log P) time, where P is the number of price levels. The highest-priority bids and asks are accessible in O(1) time.
    
-2) **Time Priority: (doubly Linked-List)** PriceLevel structs manage a doubly linked-list of Order structs. This allows for a FIFO execution of Orders and allows for an O(1) insertion of Orders.
+2) **Time Priority: (Doubly Linked-List)** Price-Level structs manage a doubly linked-list of Order structs. This allows for a FIFO execution priority for Orders at the same price level, allowing O(1) insertion at the tail and O(1) unlinking when an order's pointer is known.
 
-3) **Instant Cancellation: (std::unordered_map)** A hash map links an Order's ID with a pointer to its physical memory address. This allows the engine to directly jump to an order, unlink it from the linked-list and free its memory back into the memory pool in O(1) time without traversing through the list.
+3) **Efficient Cancellation: (std::unordered_map)** A hash map links an Order's ID with a direct pointer to its Order struct. This allows the engine to directly jump to an order, unlink it from the linked-list and free its memory back into the memory pool in O(1) average time without traversing through the list. If cancellation empties a price level, removing that level from std::map introduces an additional O(log P) operation.
 
 
 
