@@ -14,7 +14,7 @@ class OrderPool { //this will create a preallocated memory pool, preventing
 
     public:
         OrderPool(size_t capacity);
-        Order* allocate(); // No system calls o(1) allocation
+        Order* allocate(); // o(1) allocation
         void free(Order* node); //push back to stack o(1) deletion.
 
 
