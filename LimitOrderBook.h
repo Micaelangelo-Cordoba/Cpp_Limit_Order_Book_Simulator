@@ -48,6 +48,21 @@ private:
 };
     
 inline void LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
+
+        //we must be careful with prospective orders with similar ids
+        //to already marked orders.
+        //use the hash map to check if it exists, return early to prevent the new
+        //id version from overriding the valid old id version!
+
+        if (order_map.contains(id)) return; //return early
+
+
+//**** ABOVE WE SHOULD RETURN AN ENUM TO INFORM WHY AN ORDER HAS FAILED IN THE FUTURE */
+
+
+
+
+
         Order* buy_order = memory_pool.allocate(); //grab from our pre allocated mem block
 
         buy_order->id = id;
@@ -79,6 +94,21 @@ inline void LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uin
     }
 
 inline void LimitOrderBook::add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
+
+        //we must be careful with prospective orders with similar ids
+        //to already marked orders.
+        //use the hash map to check if it exists, return early to prevent the new
+        //id version from overriding the valid old id version!
+
+        if (order_map.contains(id)) return; //return early
+
+
+        //**** ABOVE WE SHOULD RETURN AN ENUM TO INFORM WHY AN ORDER HAS FAILED IN THE FUTURE */
+
+
+
+
+
         Order* ask_order = memory_pool.allocate(); //instead of using 'new'
         ask_order->id = id; 
         ask_order->price = price;
