@@ -6,6 +6,7 @@
 #include "LimitOrderBook.h"
 #include "TradingEngine.h"
 
+
 std::vector<NetworkPacket> generate_mock_traffic(size_t num_packets) { 
     using enum Type;
     std::vector<NetworkPacket> traffic;
@@ -85,6 +86,7 @@ std::vector<NetworkPacket> generate_mock_traffic(size_t num_packets) {
 
 
 int main() {
+
     std::cout << "Generating 5 million mock messages!\n";
     std::vector<NetworkPacket> mock_data = generate_mock_traffic(5'000'000);
 

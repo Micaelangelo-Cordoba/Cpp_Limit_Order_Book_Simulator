@@ -13,6 +13,17 @@ enum class Type : char { //will be used by simulated network packets to indicate
     MKT_SELL = 'M'
 };
 
+//create another scoped enumeration so we can inform the Engine why certain orders
+//have beeen Denied for various reasons
+
+enum class OrderStatus : char {
+    ACCEPTED,
+    DUPLICATE_ID, //for add_buy add_sell
+    ALLOCATION_ERR,  //cannot allocate because pool is exhausted
+    INVALID_ORDER   //certain orders have wrong field values such as
+    //0 size, 0 price.
+};
+
 struct NetworkPacket { //represents a fully parsed packet that needs to be processed by the order book
    
     uint64_t n_id;

@@ -29,7 +29,13 @@ inline OrderPool::OrderPool(size_t capacity) {
 }
 
 inline Order* OrderPool::allocate() { 
+
     if (!free_head) return nullptr;
+
+    //be wary above that this returns nullptr when it exhausts, when we add orders.
+    //we should check immediately if allocate() returns a nullptr.
+   
+
     Order* node = free_head;
     free_head = free_head->next; //pop the front of the allocated block 
     //o(1) stack pop the node from the top of the chain, make it point to the next

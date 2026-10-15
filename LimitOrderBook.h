@@ -32,12 +32,17 @@ private:
     public:
 //memory pool will be initialized with 1 million empty Order structs. We will use this pool
 //over time instead of constantly using the 'new' keyword 
+
+
+
+//GO BACK HERE TO PREVENT ERROR
+    
     LimitOrderBook() : memory_pool {5'000'000} {}
 
-    void add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
+    OrderStatus add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
 
 
-    void add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
+    OrderStatus add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
 
     void cancel_order(uint64_t id); //cancel orders in o(1) based on id.
 
@@ -47,15 +52,18 @@ private:
 
 };
     
-inline void LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
-
+inline OrderStatus LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
+        using enum OrderStatus;
         //we must be careful with prospective orders with similar ids
         //to already marked orders.
         //use the hash map to check if it exists, return early to prevent the new
         //id version from overriding the valid old id version!
 
-        if (order_map.contains(id)) return; //return early
+        if (order_map.contains(id)) return DUPLICATE_ID; //return early
 
+        //non duplicate orders can still have invalid fields such as price or size.
+
+        if (price == 0 || size == 0) return INVALID_ORDER;
 
 //**** ABOVE WE SHOULD RETURN AN ENUM TO INFORM WHY AN ORDER HAS FAILED IN THE FUTURE */
 
@@ -64,6 +72,12 @@ inline void LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uin
 
 
         Order* buy_order = memory_pool.allocate(); //grab from our pre allocated mem block
+
+        //CHECK IF ITS NULLPTR, we cant dereference. CREATE ENUM CLASS TO HANDLE
+
+        if (buy_order == nullptr) return ALLOCATION_ERR; //exhausted memory pool
+
+        //ABOVE SHOULD EVENTUALLY RETURN ENUMERATOR. update next time. TASK COMPLETED
 
         buy_order->id = id;
         buy_order->price = price;
@@ -91,25 +105,39 @@ inline void LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t price, uin
         order_map[id] = buy_order; //store the order in the hash map so when we need to access
         //it regardless of priority of queue we can access it in constant o(1) lookup rather
         //than traversing through the containers.
+
+        //order doesnt return early, means its fully valid.
+
+        return ACCEPTED;
     }
 
-inline void LimitOrderBook::add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
-
+inline OrderStatus LimitOrderBook::add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts) {
+        using enum OrderStatus;
         //we must be careful with prospective orders with similar ids
         //to already marked orders.
         //use the hash map to check if it exists, return early to prevent the new
         //id version from overriding the valid old id version!
 
-        if (order_map.contains(id)) return; //return early
+        if (order_map.contains(id)) return DUPLICATE_ID; //return early with dup id
 
 
-        //**** ABOVE WE SHOULD RETURN AN ENUM TO INFORM WHY AN ORDER HAS FAILED IN THE FUTURE */
+        //**** ABOVE WE SHOULD RETURN AN ENUM TO INFORM WHY AN ORDER HAS FAILED IN THE FUTURE  COMPLETE*/
 
 
+        //check for invalid fields
 
+        if (price == 0 || size == 0) return INVALID_ORDER; //invalid fields
 
 
         Order* ask_order = memory_pool.allocate(); //instead of using 'new'
+
+        //CHECK IF ITS NULLPTR, we cant dereference. CREATE ENUM CLASS TO HANDLE
+
+        if (ask_order == nullptr) return ALLOCATION_ERR; //exhausted pool
+
+        //ABOVE SHOULD EVENTUALLY RETURN ENUMERATOR. update next time. COMPLETE
+
+
         ask_order->id = id; 
         ask_order->price = price;
         ask_order->size = size;
@@ -133,6 +161,10 @@ inline void LimitOrderBook::add_sell_limit_order(uint64_t id, uint64_t price, ui
             plevel.tail = ask_order;
         }
         order_map[id] = ask_order;
+
+        //fully valid order passed all tests 
+
+        return ACCEPTED;
     }
     
 inline void LimitOrderBook::cancel_order(uint64_t id) {
