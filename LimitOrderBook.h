@@ -37,7 +37,13 @@ private:
 
 //GO BACK HERE TO PREVENT ERROR
     
-    LimitOrderBook() : memory_pool {5'000'000} {}
+    //explicit to prevent accidental conversion of fund type ->  LOB.
+    //default constrructor for testing, by default the Trading Engine
+    //doesnt put anything in the argument, so it does the default 5 million
+    //orders for tthe actual program, but we putt a set 
+    //value in constructor for testing.
+
+    explicit LimitOrderBook(size_t val = 5'000'000) : memory_pool {val} {}
 
     OrderStatus add_buy_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
 
