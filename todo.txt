@@ -1,0 +1,6 @@
+1) the TradingEngine class should do something with the OrderStatus, we
+can also print the distribution of successful or failed orders.
+
+2) WE MUST do matching in the add functions.
+
+3) we must profile better, but thats later 

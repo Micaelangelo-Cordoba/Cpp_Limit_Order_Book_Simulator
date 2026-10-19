@@ -17,11 +17,11 @@ class LimitOrderBook {
 private:
     OrderPool memory_pool;
 
+
     //Allows for O(1) access of Orders. There are many realistic cases where 
     //orders get deleted before they get matched, so this hash map allows us to instantly access
     //delete them without having to traverse through the linked lists of them!
     std::unordered_map<uint64_t, Order*> order_map;
-
 
     //Use std::map for price priority of bids and asks (Binary Tree)
     std::map<uint64_t, PriceLevel, std::greater<uint64_t>> bids;
@@ -50,11 +50,12 @@ private:
 
     OrderStatus add_sell_limit_order(uint64_t id, uint64_t price, uint32_t size, uint64_t ts);
 
-    void cancel_order(uint64_t id); //cancel orders in o(1) based on id.
+    OrderStatus cancel_order(uint64_t id); //cancel orders in o(1) based on id.
 
     void execute_market_buy(uint32_t size);
     
     void execute_market_sell(uint32_t size);
+
 
 };
     
@@ -66,6 +67,7 @@ inline OrderStatus LimitOrderBook::add_buy_limit_order(uint64_t id, uint64_t pri
         //id version from overriding the valid old id version!
 
         if (order_map.contains(id)) return DUPLICATE_ID; //return early
+        
 
         //non duplicate orders can still have invalid fields such as price or size.
 
@@ -173,12 +175,15 @@ inline OrderStatus LimitOrderBook::add_sell_limit_order(uint64_t id, uint64_t pr
         return ACCEPTED;
     }
     
-inline void LimitOrderBook::cancel_order(uint64_t id) {
+inline OrderStatus LimitOrderBook::cancel_order(uint64_t id) {
+        using enum OrderStatus;
        auto cancel = order_map.find(id); //look for the order in the hash map
        //will return an iterator
 
-       if (cancel == order_map.end()) return; //will return an iterator pointing to one past the last element
+       if (cancel == order_map.end()) {
+        return CANCEL_FAIL; //will return an iterator pointing to one past the last element
        //indicating that its not there. 
+       }
 
        Order* canceled = cancel->second; //get the actual order 
 
@@ -209,6 +214,9 @@ inline void LimitOrderBook::cancel_order(uint64_t id) {
 
         memory_pool.free(canceled); //give the data from the retired order back to our memory block!
         order_map.erase(cancel); //remove it from hash map 
+
+        //cancellation has succeeded with an actual formerly existing order
+        return CANCELED_ORDER;
     }
 
 

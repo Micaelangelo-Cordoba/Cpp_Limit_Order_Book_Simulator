@@ -102,8 +102,24 @@ int main() {
     double OfficialTime = timer.timeElapsed();
 
 
-    std::cout << "Processed 5 million packets in: " << OfficialTime << " microseconds\n";
-    std::cout << "Throughput: " << (5'000'000 / (OfficialTime / 1'000'000)) << "matches/sec\n";
+    //we need the Trading Engine Trading status struct TS to output relevant info on that status of various
+    //orders.
+
+    TradingStats& LOBST {engine.get_stats()};
+
+    std::cout << "= = = Matching Engine Statistics = = = \n";
+    std::cout << "Input events:     5000000\n";
+    std::cout << "Accepted limit orders:    " << LOBST.accepted_orders << "\n";
+    //all rejected orders for various reasons
+    uint64_t rejected_total = LOBST.duplicated_ids + LOBST.invalid_orders + LOBST.allocation_err;
+
+    std::cout << "Rejected orders:      " << rejected_total << "\n";
+    std::cout << "Successful cancel:    " << LOBST.cancelled_orders << "\n";
+    std::cout << "Trade executions:     " << LOBST.trade_executions << "\n";
+    std::cout << "Total shares traded:  " << LOBST.traded_shares << "\n\n\n";
+
+    std::cout << "Time To Process: " << OfficialTime << " microseconds\n";
+    std::cout << "Throughput: " << (5'000'000 / (OfficialTime / 1'000'000)) << "events/sec\n";
 
 
 

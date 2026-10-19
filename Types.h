@@ -13,17 +13,6 @@ enum class Type : char { //will be used by simulated network packets to indicate
     MKT_SELL = 'M'
 };
 
-//create another scoped enumeration so we can inform the Engine why certain orders
-//have beeen Denied for various reasons
-
-enum class OrderStatus : char {
-    ACCEPTED,
-    DUPLICATE_ID, //for add_buy add_sell
-    ALLOCATION_ERR,  //cannot allocate because pool is exhausted
-    INVALID_ORDER   //certain orders have wrong field values such as
-    //0 size, 0 price.
-};
-
 struct NetworkPacket { //represents a fully parsed packet that needs to be processed by the order book
    
     uint64_t n_id;
@@ -31,6 +20,39 @@ struct NetworkPacket { //represents a fully parsed packet that needs to be proce
     uint64_t n_timestamp;
     uint32_t n_size;
     Type N_TYPE;
+};
+
+
+
+//create another scoped enumeration so we can inform the Engine why certain orders
+//have beeen Denied for various reasons
+
+enum class OrderStatus : char {
+    ACCEPTED,
+    DUPLICATE_ID, //for add_buy add_sell
+    ALLOCATION_ERR,  //cannot allocate because pool is exhausted
+    INVALID_ORDER,   //certain orders have wrong field values such as 0 size, 0 price.
+    CANCELED_ORDER, //keep track of cancelled orders and even failure to cancel
+    CANCEL_FAIL
+        
+};
+
+//struct will be used to gather statistics that simply tracking events per second doesnt show:
+struct TradingStats {
+
+uint64_t accepted_orders {}; //counts all valid orders
+uint64_t duplicated_ids {}; //Failed orders
+uint64_t invalid_orders {}; //failed orders
+uint64_t allocation_err {}; //failed orders
+
+uint64_t cancelled_orders {}; //orders that have been cancelled before being matched!
+uint64_t trade_executions {}; //How many matches have occured!
+//must remember someone can buy 250 shares, and they would end up buying 100 orders from one seller, and 150 orders
+//out of 250 orders from another seller, leading to two trade executions despite one function call.
+
+uint64_t traded_shares {}; //how many total shares have been fully processed. (note orders contain several shares)!
+
+
 };
 
 struct PriceLevel;
