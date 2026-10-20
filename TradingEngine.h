@@ -41,6 +41,10 @@ inline void TradingEngine::process_stats(OrderStatus OS) { //put this in the swi
             TS.cancelled_orders++;
             break;
         }
+        case (CANCEL_FAIL): {
+            TS.cancel_fails++;
+            break;
+        }
         case (DUPLICATE_ID): { //duplicate ids
             TS.duplicated_ids++;
             break;
@@ -83,11 +87,22 @@ inline void TradingEngine::packet_received(const NetworkPacket& packet) {
             break;
         }
         case (MKT_BUY): {
-            LOB.execute_market_buy(packet.n_size);
+            //now market buy and market sell should return MatchResult structs providing
+            //how many trades have been executed, and how many total shares have been processed
+
+            MatchResult MR = LOB.execute_market_buy(packet.n_size);
+            TS.trade_executions += MR.trade_exec;
+            TS.traded_shares += MR.trad_shar;
+            TS.market_buy_requests += MR.mark_buy_req;
             break;
         }
         case (MKT_SELL): {
-            LOB.execute_market_sell(packet.n_size);
+
+            MatchResult MR = LOB.execute_market_sell(packet.n_size);
+            TS.trade_executions += MR.trade_exec;
+            TS.traded_shares += MR.trad_shar;
+            TS.market_sell_requests += MR.mark_sell_req;
+
             break;
         }
         default: {

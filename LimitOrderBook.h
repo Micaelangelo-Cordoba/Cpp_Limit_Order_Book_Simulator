@@ -52,9 +52,9 @@ private:
 
     OrderStatus cancel_order(uint64_t id); //cancel orders in o(1) based on id.
 
-    void execute_market_buy(uint32_t size);
+    MatchResult execute_market_buy(uint32_t size);
     
-    void execute_market_sell(uint32_t size);
+    MatchResult execute_market_sell(uint32_t size);
 
 
 };
@@ -220,15 +220,30 @@ inline OrderStatus LimitOrderBook::cancel_order(uint64_t id) {
     }
 
 
-inline void LimitOrderBook::execute_market_sell(uint32_t size) {
+inline MatchResult LimitOrderBook::execute_market_sell(uint32_t size) {
+        MatchResult result {}; //this will be returned
+
+        //this function is a market sell request, increment
+        result.mark_sell_req++;
+
         auto trades = bids.begin(); 
         
-        while (trades != bids.end() && size > 0) { 
+        while (trades != bids.end() && size > 0) {  //trades traverse levels
 
-            PriceLevel& priority_bids = trades->second;
-            Order* curr_bid = priority_bids.head;
+            PriceLevel& priority_bids = trades->second; //priority_bids is the level
+            Order* curr_bid = priority_bids.head; //where curr_bid traverses each order
             
-            while (curr_bid != nullptr && size > 0) {
+            while (curr_bid != nullptr && size > 0) { 
+                //we should increment trade_exec here this is a new order
+
+                result.trade_exec++; //curr_bid traverses orders, so this increments
+                //once every iteration of the loop. the order doesnt have to be completely
+                //finished to increment here.
+
+                //the amount of shares in the order could be less than the total
+                //shares left to be processed, get the minimum to increment
+                result.trad_shar += std::min(curr_bid->size, size);
+                
                 if (curr_bid->size <= size) {
                     size -= curr_bid->size;
                     priority_bids.total_volume -= curr_bid->size;
@@ -256,9 +271,16 @@ inline void LimitOrderBook::execute_market_sell(uint32_t size) {
                 priority_bids.head = curr_bid; //make sure the head is updated.
             }
         }
+        return result; //return result to be processed by TradingEngine
     }
     
-inline void LimitOrderBook::execute_market_buy(uint32_t size) {
+inline MatchResult LimitOrderBook::execute_market_buy(uint32_t size) {
+
+        MatchResult result {};
+
+        //this is considered a market_buy_request increment
+        result.mark_buy_req++;
+        
         auto trades = asks.begin(); //points to the priority asks of std::map
 
         while (trades != asks.end() && size > 0) { //loop continues until there is either no more ask orders (unlikely) or the user fully satisfied all of their orders
@@ -267,6 +289,11 @@ inline void LimitOrderBook::execute_market_buy(uint32_t size) {
             Order* curr_ask = priority_asks.head;
 
             while (curr_ask != nullptr && size > 0) {
+                
+                result.trade_exec++;
+
+                result.trad_shar += std::min(curr_ask->size, size);
+
             if (curr_ask->size <= size) {
                 size -= curr_ask->size;
                 priority_asks.total_volume -= curr_ask->size;
@@ -294,6 +321,8 @@ inline void LimitOrderBook::execute_market_buy(uint32_t size) {
                 priority_asks.head = curr_ask;
             }
         }
+
+        return result;
 
     }
 #endif

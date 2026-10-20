@@ -46,12 +46,25 @@ uint64_t invalid_orders {}; //failed orders
 uint64_t allocation_err {}; //failed orders
 
 uint64_t cancelled_orders {}; //orders that have been cancelled before being matched!
+uint64_t cancel_fails {}; //now accounting for cancel failures
 uint64_t trade_executions {}; //How many matches have occured!
 //must remember someone can buy 250 shares, and they would end up buying 100 orders from one seller, and 150 orders
 //out of 250 orders from another seller, leading to two trade executions despite one function call.
 
 uint64_t traded_shares {}; //how many total shares have been fully processed. (note orders contain several shares)!
 
+uint64_t market_buy_requests {};
+uint64_t market_sell_requests {};
+
+};
+struct MatchResult { //OrderStatus cannot necessarily represent tradeExecutions and TradedShares since
+    //they dont increment by one. So we can use the matching functions to return one of these.
+
+    uint64_t trade_exec {};
+    uint64_t trad_shar {};
+
+    uint64_t mark_buy_req {};
+    uint64_t mark_sell_req {};
 
 };
 

@@ -108,18 +108,21 @@ int main() {
     TradingStats& LOBST {engine.get_stats()};
 
     std::cout << "= = = Matching Engine Statistics = = = \n";
-    std::cout << "Input events:     5000000\n";
-    std::cout << "Accepted limit orders:    " << LOBST.accepted_orders << "\n";
+    std::cout << "Input Events:             5000000\n";
+    std::cout << "Accepted Limit Orders:    " << LOBST.accepted_orders << "\n";
     //all rejected orders for various reasons
     uint64_t rejected_total = LOBST.duplicated_ids + LOBST.invalid_orders + LOBST.allocation_err;
 
-    std::cout << "Rejected orders:      " << rejected_total << "\n";
-    std::cout << "Successful cancel:    " << LOBST.cancelled_orders << "\n";
-    std::cout << "Trade executions:     " << LOBST.trade_executions << "\n";
-    std::cout << "Total shares traded:  " << LOBST.traded_shares << "\n\n\n";
+    std::cout << "Rejected Orders:          " << rejected_total << "\n";
+    std::cout << "Successful Cancels:       " << LOBST.cancelled_orders << "\n";
+    std::cout << "Rejected Cancels:         " << LOBST.cancel_fails << "\n";
+    std::cout << "Market Buy Requests:      " << LOBST.market_buy_requests << "\n";
+    std::cout << "Market Sell Requests:     " << LOBST.market_sell_requests << "\n";
+    std::cout << "Trade Executions:         " << LOBST.trade_executions << "\n";
+    std::cout << "Total Shares Traded:      " << LOBST.traded_shares << "\n\n\n";
 
     std::cout << "Time To Process: " << OfficialTime << " microseconds\n";
-    std::cout << "Throughput: " << (5'000'000 / (OfficialTime / 1'000'000)) << "events/sec\n";
+    std::cout << "Throughput: " << (5'000'000 / (OfficialTime / 1'000'000)) << " events/sec\n";
 
 
 
